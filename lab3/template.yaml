@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Simple API Gateway + Lambda + S3 example (Node.js)
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: nodejs20.x
+    MemorySize: 128
+
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "peniak09781-node-api-bucket-${AWS::AccountId}"
+
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.handler
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref MyBucket
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref MyBucket
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /data
+            Method: get
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint for Prod stage and /data"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/data"
