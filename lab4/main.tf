@@ -30,13 +30,24 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/lambda_function.zip"
 }
 
+resource "aws_s3_object" "lambda_zip" {
+  bucket = aws_s3_bucket.lambda_bucket.bucket
+  key    = "lambda_function.zip"
+  source = data.archive_file.lambda_zip.output_path
+  etag   = filemd5(data.archive_file.lambda_zip.output_path)
+}
+
 resource "aws_lambda_function" "hello_lambda" {
   function_name    = var.lambda_function_name
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  s3_bucket = aws_s3_bucket.lambda_bucket.bucket
+  s3_key    = aws_s3_object.lambda_zip.key
+
   handler          = "index.handler"
   runtime          = "nodejs20.x"
   role             = aws_iam_role.lambda_role.arn
+
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 }
 
 resource "aws_api_gateway_rest_api" "lambda_api" {
