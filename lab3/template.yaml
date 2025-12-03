@@ -9,10 +9,10 @@ Globals:
     MemorySize: 128
 
 Resources:
-  MyBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "peniak09781-node-api-bucket-${AWS::AccountId}"
+  #MyBucket:
+  #Type: AWS::S3::Bucket
+  #Properties:
+  #BucketName: "peniak08781-node-api-bucket-597320882263"
 
   MyFunction:
     Type: AWS::Serverless::Function
@@ -21,18 +21,18 @@ Resources:
       Handler: app.handler
       Environment:
         Variables:
-          BUCKET_NAME: !Ref MyBucket
+          BUCKET_NAME: peniak08781-node-api-bucket-597320882263
       Policies:
         - S3ReadPolicy:
-            BucketName: !Ref MyBucket
+            BucketName: peniak08781-node-api-bucket-597320882263
       Events:
         ApiEvent:
           Type: Api
           Properties:
-            Path: /data
+            Path: /greetings
             Method: get
 
 Outputs:
   ApiUrl:
     Description: "API Gateway endpoint for Prod stage and /data"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/data"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/greetings"
